@@ -1,0 +1,128 @@
+# app.py - Student Performance Prediction System (Python Flask)
+
+# Line 1: Import required libraries
+from flask import Flask, render_template, request, jsonify
+
+# Line 2: Initialize Flask app
+app = Flask(__name__)
+
+# Line 3: Set secret key for sessions
+app.secret_key = 'student_performance_prediction'
+
+# Line 4: Define prediction function
+def calculate_prediction(study_hours, attendance, previous_score, extra_activities):
+    """
+    Calculate predicted score based on input parameters
+    
+    Formula:
+    - Study Hours: multiplied by 2.5
+    - Attendance: multiplied by 0.5
+    - Previous Score: multiplied by 0.8
+    - Extra Activities: multiplied by 0.3
+    """
+    score = (study_hours * 2.5) + (attendance * 0.5) + (previous_score * 0.8) + (extra_activities * 0.3)
+    
+    # Line 5: Normalize to 0-100 range
+    predicted = min(100, max(0, round(score, 2)))
+    
+    return predicted
+
+# Line 6: Define performance category
+def get_category(score):
+    """Get performance category based on score"""
+    if score >= 80:
+        return 'Excellent'
+    elif score >= 60:
+        return 'Good'
+    elif score >= 40:
+        return 'Average'
+    else:
+        return 'Needs Improvement'
+
+# Line 7: Define home route
+@app.route('/')
+def home():
+    """Render the main webpage"""
+    return render_template('index.html')
+
+# Line 8: Define prediction API route
+@app.route('/predict', methods=['POST'])
+def predict():
+    """
+    Handle prediction request
+    Validates that all fields are filled
+    """
+    # Line 9: Get form data
+    study_hours = request.form.get('study_hours', '').strip()
+    attendance = request.form.get('attendance', '').strip()
+    previous_score = request.form.get('previous_score', '').strip()
+    extra_activities = request.form.get('extra_activities', '').strip()
+    
+    # Line 10: Validation - Check if any field is empty
+    errors = []
+    
+    if study_hours == '':
+        errors.append('Study Hours is required!')
+    elif not study_hours.replace('.', '').isdigit():
+        errors.append('Study Hours must be a number!')
+    elif float(study_hours) < 0 or float(study_hours) > 24:
+        errors.append('Study Hours must be between 0 and 24!')
+    
+    if attendance == '':
+        errors.append('Attendance is required!')
+    elif not attendance.replace('.', '').isdigit():
+        errors.append('Attendance must be a number!')
+    elif float(attendance) < 0 or float(attendance) > 100:
+        errors.append('Attendance must be between 0 and 100!')
+    
+    if previous_score == '':
+        errors.append('Previous Score is required!')
+    elif not previous_score.replace('.', '').isdigit():
+        errors.append('Previous Score must be a number!')
+    elif float(previous_score) < 0 or float(previous_score) > 100:
+        errors.append('Previous Score must be between 0 and 100!')
+    
+    if extra_activities == '':
+        errors.append('Extra Activities is required!')
+    elif not extra_activities.replace('.', '').isdigit():
+        errors.append('Extra Activities must be a number!')
+    elif float(extra_activities) < 0 or float(extra_activities) > 168:
+        errors.append('Extra Activities must be between 0 and 168!')
+    
+    # Line 11: If there are errors, return them
+    if errors:
+        return jsonify({
+            'success': False,
+            'errors': errors
+        })
+    
+    # Line 12: Convert to float
+    study_hours = float(study_hours)
+    attendance = float(attendance)
+    previous_score = float(previous_score)
+    extra_activities = float(extra_activities)
+    
+    # Line 13: Calculate prediction
+    predicted_score = calculate_prediction(
+        study_hours, 
+        attendance, 
+        previous_score, 
+        extra_activities
+    )
+    
+    # Line 14: Get category
+    category = get_category(predicted_score)
+    
+    # Line 15: Return success response
+    return jsonify({
+        'success': True,
+        'prediction': predicted_score,
+        'category': category
+    })
+
+# Line 16: Run the app
+if __name__ == '__main__':
+    print("🚀 Starting Student Performance Prediction System")
+    print("📡 Server running at http://localhost:5000")
+    app.run(debug=True)
+    
