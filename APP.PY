@@ -1,6 +1,6 @@
 # app.py - Student Performance Prediction System
 
-from flask import Flask, render_template, request, jsonify # pyright: ignore[reportMissingImports]
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
@@ -85,4 +85,3 @@ if __name__ == '__main__':
     print("🚀 Starting Student Performance Prediction System")
     print("📡 Server running at http://localhost:5000")
     app.run(debug=True)
-    
