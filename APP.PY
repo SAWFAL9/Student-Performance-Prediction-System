@@ -1,6 +1,6 @@
 # app.py - Student Performance Prediction System
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify # pyright: ignore[reportMissingImports]
 
 app = Flask(__name__)
 
